@@ -1,0 +1,113 @@
+---
+title: "molly10_OriginalHomeworkCode_05"
+author: "Yinuo Mao"
+date: "2025-04-10"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(boot)
+```
+
+### Using the “KamilarAndCooperData.csv” dataset, run a linear regression looking at log(HomeRange_km2) in relation to log(Body_mass_female_mean) and report your 𝛽 coeffiecients (slope and intercept).
+Lindsay: All comments will start with Lindsay so they're easy to find! One quick change to make off the bat is I noticed the Beta didn't knit properly into the html file. You can fix this by doing this: $\beta$ instead of just copying/pasting the letter. This actually codes it into the knit so you don't just get a blank letter :)
+```{r}
+# Read in data
+kamilar_cooper <- read.csv("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/refs/heads/master/AN588_Spring25/KamilarAndCooperData.csv")
+
+# Create filtered_data by removing NA values
+filtered_data <- kamilar_cooper[!is.na(kamilar_cooper$HomeRange_km2) & 
+                               !is.na(kamilar_cooper$Body_mass_female_mean),]
+
+# Create log-transformed variables
+filtered_data$logHomeRange <- log(filtered_data$HomeRange_km2)
+filtered_data$logBodyMass <- log(filtered_data$Body_mass_female_mean)
+
+# Run linear regression
+lm_model <- lm(logHomeRange ~ logBodyMass, data = filtered_data)
+
+# Display the summary to see coefficients
+summary(lm_model)
+
+# Extract just the coefficients
+coef(lm_model)
+
+#Lindsay: Everything here seems good! It's more or less what I did too for my code. One small thing I did differently is I just straight put the log of my variables into the linear regression model as in:
+#lm_model<-lm(log(HomeRange_km2)~logBody_mass_female_mean, data=filtered_data)
+#which saves you just a bit of extra time but I don't think the efficiency of the program matters that much and you get the same result either way. Otherwise incredibly well done! :)
+```
+
+### Use bootstrapping to sample from your data 1000 times with replacement, each time fitting the same model and calculating the same coefficients. This generates a sampling distribution for each 𝛽 coefficient.Estimate the standard error for each of your 𝛽 coefficients as the standard deviation of the sampling distribution from your bootstrap and determine the 95% CI for each of your 𝛽 coefficients based on the appropriate quantiles from your sampling distribution.
+```{r}
+# Set seed for reproducibility
+set.seed(123)
+
+# Number of bootstrap replicates
+n_boot <- 1000
+
+# Initialize vectors to store the bootstrap estimates
+boot_intercepts <- numeric(n_boot)
+boot_slopes <- numeric(n_boot)
+
+# Perform bootstrap
+for (i in 1:n_boot) {
+  # Sample with replacement
+  boot_indices <- sample(nrow(filtered_data), replace = TRUE)
+  boot_sample <- filtered_data[boot_indices, ]
+  
+  # Fit the model on bootstrap sample
+  boot_model <- lm(logHomeRange ~ logBodyMass, data = boot_sample)
+  
+  # Store the coefficients
+  boot_intercepts[i] <- coef(boot_model)[1]
+  boot_slopes[i] <- coef(boot_model)[2]
+}
+
+# Calculate the mean of the bootstrap estimates
+mean_boot_intercept <- mean(boot_intercepts)
+mean_boot_slope <- mean(boot_slopes)
+
+# Calculate bootstrap standard errors
+se_boot_intercept <- sd(boot_intercepts)
+se_boot_slope <- sd(boot_slopes)
+
+# Calculate bootstrap confidence intervals (95%)
+ci_boot_intercept <- quantile(boot_intercepts, c(0.025, 0.975))
+ci_boot_slope <- quantile(boot_slopes, c(0.025, 0.975))
+
+# Compare bootstrap results with original model
+boot_results <- data.frame(
+  Parameter = c("Intercept", "Slope"),
+  Original_Estimate = coef(lm_model),
+  Original_SE = sqrt(diag(vcov(lm_model))),
+  Original_CI_Lower = confint(lm_model)[,1],
+  Original_CI_Upper = confint(lm_model)[,2],
+  Bootstrap_Mean = c(mean_boot_intercept, mean_boot_slope),
+  Bootstrap_SE = c(se_boot_intercept, se_boot_slope),
+  Bootstrap_CI_Lower = c(ci_boot_intercept[1], ci_boot_slope[1]),
+  Bootstrap_CI_Upper = c(ci_boot_intercept[2], ci_boot_slope[2])
+)
+
+# Display the comparison
+boot_results
+
+#Lindsay: Everything looks really good here! I really liked how you used data frames to present your information! This is a little neater than what my code looks like but it's mostly the same! Nice work :)
+```
+
+### How does the former compare to the SE estimated from your entire dataset using the formula for standard error implemented in lm()?
+For the intercept coefficient, the bootstrap SE is smaller than the SE from the linear model. This suggests that the linear model might be slightly overestimating the uncertainty in the intercept. For the slope coefficient, the bootstrap SE is a little closer to the the SE from the linear model compared with the intercept coefficient but still about 5-10% smaller. The smaller bootstrap SEs suggest that the data may actually have less variability than what would be expected under the strict parametric assumptions, particularly for the intercept estimate.
+
+### How does the latter compare to the 95% CI estimated from your entire dataset?
+For the intercept coefficient, the bootstrap CI is slightly narrower and less symmetric than the parametric CI, with a higher lower bound, means there is more certainty about the minimum intercept value. Similarly, for the slope coefficient, the bootstrap CI has a higher lower bound while remains a similar upper bound compared to the parametric CI, indicating greater confidence in the minimum strength of the relationship between body mass and home range size. These patterns suggest that linear model, which rely on assumptions of normality and homoscedasticity, may be slightly overestimating the uncertainty in our regression parameters. However, the bootstrap method, by directly sampling from the observed data without making these assumptions, provide a more data-driven representation of uncertainty that show a stronger and more definite relationship between primate body mass and home range size than indicated by standard linear model CIs.
+
+## Challenges
+1. At first, I found it really hard to grasp what bootstrapping actually does and why we need to sample with replacement. It took me a while to understand that we're trying to simulate having multiple datasets.
+2. Trying to write the bootstrap code from scratch with for-loops was super frustrating! I kept getting errors about data types and subsetting. The loop would either crash or run forever without giving me results.
+3. Once I got all the numbers, figuring out what the differences between bootstrap SE and regular SE actually meant for my analysis wasn't straightforward. I wasn't sure if smaller bootstrap SEs were good or bad.
+4. Creating the function to extract coefficients for the boot() function was tricky. I had to make sure it returned exactly what I needed in the right format.
+5. Getting the confidence intervals to display nicely in my final comparison table was surprisingly difficult. I had to figure out how to extract the values from boot.ci() output and convert them to a readable format.
+
+Lindsay: Overall really nice job! I don't see anything overtly wrong with the code and most of it is what I did! I really liked the commentary on your code and how neat everything looked. I only had one small note in there but you got the same result anyways. Good job :)
