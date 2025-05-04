@@ -369,11 +369,11 @@ library(dplyr)</code></pre>
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <pre class="r"><code>library(boot)</code></pre>
-<div id="using-the-kamilarandcooperdata.csv-dataset-run-a-linear-regression-looking-at-loghomerange_km2-in-relation-to-logbody_mass_female_mean-and-report-your-𝛽-coeffiecients-slope-and-intercept." class="section level3">
-<h3>Using the “KamilarAndCooperData.csv” dataset, run a linear
-regression looking at log(HomeRange_km2) in relation to
-log(Body_mass_female_mean) and report your 𝛽 coeffiecients (slope and
-intercept).</h3>
+<div id="question-1" class="section level1">
+<h1>Question 1</h1>
+<p>Using the “KamilarAndCooperData.csv” dataset, run a linear regression
+looking at log(HomeRange_km2) in relation to log(Body_mass_female_mean)
+and report your 𝛽 coeffiecients (slope and intercept).</p>
 <pre class="r"><code># Read in data
 kamilar_cooper &lt;- read.csv(&quot;https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/refs/heads/master/AN588_Spring25/KamilarAndCooperData.csv&quot;)
 
@@ -389,14 +389,15 @@ coef(lm_model)</code></pre>
 <pre><code>##                (Intercept) log(Body_mass_female_mean) 
 ##                  -9.441231                   1.036432</code></pre>
 </div>
-<div id="use-bootstrapping-to-sample-from-your-data-1000-times-with-replacement-each-time-fitting-the-same-model-and-calculating-the-same-coefficients.-this-generates-a-sampling-distribution-for-each-𝛽-coefficient.estimate-the-standard-error-for-each-of-your-𝛽-coefficients-as-the-standard-deviation-of-the-sampling-distribution-from-your-bootstrap-and-determine-the-95-ci-for-each-of-your-𝛽-coefficients-based-on-the-appropriate-quantiles-from-your-sampling-distribution." class="section level3">
-<h3>Use bootstrapping to sample from your data 1000 times with
+<div id="question-2" class="section level1">
+<h1>Question 2</h1>
+<p>Use bootstrapping to sample from your data 1000 times with
 replacement, each time fitting the same model and calculating the same
 coefficients. This generates a sampling distribution for each 𝛽
 coefficient.Estimate the standard error for each of your 𝛽 coefficients
 as the standard deviation of the sampling distribution from your
 bootstrap and determine the 95% CI for each of your 𝛽 coefficients based
-on the appropriate quantiles from your sampling distribution.</h3>
+on the appropriate quantiles from your sampling distribution.</p>
 <pre class="r"><code># Set seed for reproducibility
 set.seed(123)
 
@@ -420,7 +421,6 @@ for (i in 1:n_boot) {
   boot_intercepts[i] &lt;- coef(boot_model)[1]
   boot_slopes[i] &lt;- coef(boot_model)[2]
 }</code></pre>
-</div>
 <div id="how-does-the-former-compare-to-the-se-estimated-from-your-entire-dataset-using-the-formula-for-standard-error-implemented-in-lm" class="section level3">
 <h3>How does the former compare to the SE estimated from your entire
 dataset using the formula for standard error implemented in lm()?</h3>
@@ -452,34 +452,34 @@ provide a more data-driven representation of uncertainty that show a
 stronger and more definite relationship between primate body mass and
 home range size than indicated by standard linear model CIs.</p>
 </div>
-<div id="challenges" class="section level2">
-<h2>Challenges</h2>
+</div>
+<div id="challenges" class="section level1">
+<h1>Challenges</h1>
 <ol style="list-style-type: decimal">
-<li>At first, I found it really hard to grasp what bootstrapping
+<li><p>At first, I found it really hard to grasp what bootstrapping
 actually does and why we need to sample with replacement. It took me a
 while to understand that we’re trying to simulate having multiple
-datasets.</li>
-<li>Trying to write the bootstrap code from scratch with for-loops was
-super frustrating! I kept getting errors about data types and
+datasets.</p></li>
+<li><p>Trying to write the bootstrap code from scratch with for-loops
+was super frustrating! I kept getting errors about data types and
 subsetting. The loop would either crash or run forever without giving me
-results.</li>
-<li>Once I got all the numbers, figuring out what the differences
+results.</p></li>
+<li><p>Once I got all the numbers, figuring out what the differences
 between bootstrap SE and regular SE actually meant for my analysis
 wasn’t straightforward. I wasn’t sure if smaller bootstrap SEs were good
-or bad.</li>
-<li>Creating the function to extract coefficients for the boot()
+or bad.</p></li>
+<li><p>Creating the function to extract coefficients for the boot()
 function was tricky. I had to make sure it returned exactly what I
-needed in the right format.</li>
-<li>Getting the confidence intervals to display nicely in my final
+needed in the right format.</p></li>
+<li><p>Getting the confidence intervals to display nicely in my final
 comparison table was surprisingly difficult. I had to figure out how to
 extract the values from boot.ci() output and convert them to a readable
-format.</li>
+format.</p></li>
 </ol>
 </div>
 <div id="extra-credit" class="section level1">
 <h1>EXTRA CREDIT</h1>
-<div id="write-a-function-that-takes-as-its-arguments-a-dataframe-d-a-linear-model-m-as-a-character-string-e.g.-loghrlogbm-a-user-defined-confidence-interval-level-conf.level-with-default-0.95-and-a-number-of-bootstrap-replicates-n-with-default-1000.-your-function-should-return-a-dataframe-that-includes-beta-coefficient-names-beta-coefficients-standard-errors-and-upper-and-lower-ci-limits-for-the-linear-model-based-on-your-entire-dataset-and-mean-beta-coefficient-estimates-ses-and-ci-limits-for-those-coefficients-based-on-your-bootstrap." class="section level3">
-<h3>Write a FUNCTION that takes as its arguments a dataframe, “d”, a
+<p>Write a FUNCTION that takes as its arguments a dataframe, “d”, a
 linear model, “m” (as a character string, e.g., “logHR~logBM”), a
 user-defined confidence interval level, “conf.level” (with default =
 0.95), and a number of bootstrap replicates, “n” (with default = 1000).
@@ -487,7 +487,7 @@ Your function should return a dataframe that includes: beta coefficient
 names; beta coefficients, standard errors, and upper and lower CI limits
 for the linear model based on your entire dataset; and mean beta
 coefficient estimates, SEs, and CI limits for those coefficients based
-on your bootstrap.</h3>
+on your bootstrap.</p>
 <pre class="r"><code># Create log-transformed variables
 filtered_data$logHomeRange &lt;- log(filtered_data$HomeRange_km2)
 filtered_data$logBodyMass &lt;- log(filtered_data$Body_mass_female_mean)
@@ -549,7 +549,6 @@ print(test_results)</code></pre>
 ##                boot_se boot_ci_lower boot_ci_upper
 ## (Intercept) 0.58375006   -10.6128666     -8.358391
 ## logBodyMass 0.07424384     0.8943319      1.188797</code></pre>
-</div>
 </div>
 
 

@@ -12,7 +12,10 @@ library(dplyr)
 library(boot)
 ```
 
-### Using the “KamilarAndCooperData.csv” dataset, run a linear regression looking at log(HomeRange_km2) in relation to log(Body_mass_female_mean) and report your 𝛽 coeffiecients (slope and intercept).
+# Question 1
+
+Using the “KamilarAndCooperData.csv” dataset, run a linear regression looking at log(HomeRange_km2) in relation to log(Body_mass_female_mean) and report your 𝛽 coeffiecients (slope and intercept).
+
 ```{r}
 # Read in data
 kamilar_cooper <- read.csv("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/refs/heads/master/AN588_Spring25/KamilarAndCooperData.csv")
@@ -28,7 +31,10 @@ lm_model<-lm(log(HomeRange_km2)~log(Body_mass_female_mean), data=filtered_data)
 coef(lm_model)
 ```
 
-### Use bootstrapping to sample from your data 1000 times with replacement, each time fitting the same model and calculating the same coefficients. This generates a sampling distribution for each 𝛽 coefficient.Estimate the standard error for each of your 𝛽 coefficients as the standard deviation of the sampling distribution from your bootstrap and determine the 95% CI for each of your 𝛽 coefficients based on the appropriate quantiles from your sampling distribution.
+# Question 2
+
+Use bootstrapping to sample from your data 1000 times with replacement, each time fitting the same model and calculating the same coefficients. This generates a sampling distribution for each 𝛽 coefficient.Estimate the standard error for each of your 𝛽 coefficients as the standard deviation of the sampling distribution from your bootstrap and determine the 95% CI for each of your 𝛽 coefficients based on the appropriate quantiles from your sampling distribution.
+
 ```{r}
 # Set seed for reproducibility
 set.seed(123)
@@ -56,22 +62,30 @@ for (i in 1:n_boot) {
 ```
 
 ### How does the former compare to the SE estimated from your entire dataset using the formula for standard error implemented in lm()?
+
 For the intercept coefficient, the bootstrap SE is smaller than the SE from the linear model. This suggests that the linear model might be slightly overestimating the uncertainty in the intercept. For the slope coefficient, the bootstrap SE is a little closer to the the SE from the linear model compared with the intercept coefficient but still about 5-10% smaller. The smaller bootstrap SEs suggest that the data may actually have less variability than what would be expected under the strict parametric assumptions, particularly for the intercept estimate.
 
 ### How does the latter compare to the 95% CI estimated from your entire dataset?
+
 For the intercept coefficient, the bootstrap CI is slightly narrower and less symmetric than the parametric CI, with a higher lower bound, means there is more certainty about the minimum intercept value. Similarly, for the slope coefficient, the bootstrap CI has a higher lower bound while remains a similar upper bound compared to the parametric CI, indicating greater confidence in the minimum strength of the relationship between body mass and home range size. These patterns suggest that linear model, which rely on assumptions of normality and homoscedasticity, may be slightly overestimating the uncertainty in our regression parameters. However, the bootstrap method, by directly sampling from the observed data without making these assumptions, provide a more data-driven representation of uncertainty that show a stronger and more definite relationship between primate body mass and home range size than indicated by standard linear model CIs.
 
-## Challenges
+# Challenges
+
 1. At first, I found it really hard to grasp what bootstrapping actually does and why we need to sample with replacement. It took me a while to understand that we're trying to simulate having multiple datasets.
+
 2. Trying to write the bootstrap code from scratch with for-loops was super frustrating! I kept getting errors about data types and subsetting. The loop would either crash or run forever without giving me results.
+
 3. Once I got all the numbers, figuring out what the differences between bootstrap SE and regular SE actually meant for my analysis wasn't straightforward. I wasn't sure if smaller bootstrap SEs were good or bad.
+
 4. Creating the function to extract coefficients for the boot() function was tricky. I had to make sure it returned exactly what I needed in the right format.
+
 5. Getting the confidence intervals to display nicely in my final comparison table was surprisingly difficult. I had to figure out how to extract the values from boot.ci() output and convert them to a readable format.
 
 
 # EXTRA CREDIT
 
-### Write a FUNCTION that takes as its arguments a dataframe, “d”, a linear model, “m” (as a character string, e.g., “logHR~logBM”), a user-defined confidence interval level, “conf.level” (with default = 0.95), and a number of bootstrap replicates, “n” (with default = 1000). Your function should return a dataframe that includes: beta coefficient names; beta coefficients, standard errors, and upper and lower CI limits for the linear model based on your entire dataset; and mean beta coefficient estimates, SEs, and CI limits for those coefficients based on your bootstrap.
+Write a FUNCTION that takes as its arguments a dataframe, “d”, a linear model, “m” (as a character string, e.g., “logHR~logBM”), a user-defined confidence interval level, “conf.level” (with default = 0.95), and a number of bootstrap replicates, “n” (with default = 1000). Your function should return a dataframe that includes: beta coefficient names; beta coefficients, standard errors, and upper and lower CI limits for the linear model based on your entire dataset; and mean beta coefficient estimates, SEs, and CI limits for those coefficients based on your bootstrap.
+
 ```{r}
 # Create log-transformed variables
 filtered_data$logHomeRange <- log(filtered_data$HomeRange_km2)
